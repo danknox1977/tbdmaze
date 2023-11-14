@@ -3,9 +3,9 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const { db } = require("./db");
-const { UserController } = require('./controllers');
-const validateSession = require("./middleware/validate-session");
-const jwt = require("jsonwebtoken");
+const { UserController, CharacterController } = require('./controllers');
+// const validateSession = require("./middleware/validate-session");
+// const jwt = require("jsonwebtoken");
 
 const app = express();
 const PORT = process.env.PORT;
@@ -19,6 +19,7 @@ const log = console.log;
 
 //! ROUTES
 app.use("/user", UserController)
+app.use("/character", CharacterController)
 
 //! CONNECTION
 

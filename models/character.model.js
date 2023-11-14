@@ -1,4 +1,4 @@
-const mongoose = reqire("mongoose");
+const mongoose = require("mongoose");
 
 const CharacterSchema = new mongoose.Schema({
     characterName: {
@@ -18,7 +18,26 @@ const CharacterSchema = new mongoose.Schema({
     backstory: {
         type: String
     },
-    
+    level: {
+        type: Number,
+        default: 0,
+    },
+    experience: {
+        type: Number,
+        default: 0,
+    },
+    offense: {
+        type: Number,
+        default: 0,
+    },
+    defense: {
+        type: Number,
+        default: 0,
+    },
+    health: {
+        type: Number,
+        default: 0,
+    },
 });
 
 module.exports = mongoose.model("Character", CharacterSchema)
