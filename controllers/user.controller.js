@@ -1,16 +1,16 @@
 const router = require("express").Router();
 const { response } = require("express");
-const Creator = require("../models/user.model");
+const User = require("../models/user.model");
 const bcrypt = require("bcrypt");
 const { error, success, incomplete } = require("../utils");
 const validateSession = require("../middleware/validate-session");
 const jwt = require("jsonwebtoken");
 const SECRET = process.env.JWT;
 
-// !! Create/Signup -- POST
+// !! Signup -- POST
 router.post("/signup", async (req, res) => {
   try {
-    const creator = new Creator({
+    const user = new User({
       username: req.body.username,
       firstName: req.body.firstName,
       lastName: req.body.lastName,
@@ -18,12 +18,12 @@ router.post("/signup", async (req, res) => {
       password: bcrypt.hashSync(req.body.password, 13),
       socials: req.body.socials,
     });
-    const newCreator = await creator.save();
-    const token = jwt.sign({ id: newCreator._id }, SECRET, {
+    const newUser = await user.save();
+    const token = jwt.sign({ id: newUser._id }, SECRET, {
       expiresIn: "1 day",
     });
     res.status(200).json({
-      creator: newCreator,
+      user: newUser,
       message: "Success!",
       token,
     });
@@ -38,18 +38,18 @@ router.post("/signup", async (req, res) => {
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
-    const creator = await Creator.findOne({ email: email });
-    const passwordMatch = await bcrypt.compare(password, creator.password);
-    if (!creator || !passwordMatch)
+    const user = await User.findOne({ email: email });
+    const passwordMatch = await bcrypt.compare(password, user.password);
+    if (!user || !passwordMatch)
       throw new Error("That combination of Email and Password does not match");
-    const token = jwt.sign({ id: creator._id }, SECRET, {
+    const token = jwt.sign({ id: user._id }, SECRET, {
       expiresIn: "1 day",
     });
-    let creatorID = creator._id;
+    let userID = user._id;
     res.status(200).json({
       message: `Success!`,
-      creator,
-      creatorID,
+      user,
+      userID,
       token,
     });
   } catch (err) {
@@ -60,45 +60,45 @@ router.post("/login", async (req, res) => {
 });
 
 // !! Update By ID -- PATCH
-router.patch("/edit/:creatorID", validateSession, async (req, res) => {
+router.patch("/edit/:userID", validateSession, async (req, res) => {
   try {
-    const creatorID = req.params.creatorID;
+    const userID = req.params.userID;
     const newUsername = req.body.username;
     const newFirstName = req.body.firstName;
     const newLastName = req.body.lastName;
     const newEmail = req.body.email;
-    const newSocials = req.body.socials;
+    
 
     const updatedInfo = {
       username: newUsername,
       firstName: newFirstName,
       lastName: newLastName,
       email: newEmail,
-      socials: newSocials,
+     
     };
-    const updatedCreator = await Creator.findOneAndUpdate(
-      { _id: creatorID },
+    const updatedUser = await User.findOneAndUpdate(
+      { _id: userID },
       updatedInfo,
       { new: true }
     );
-    if (!updatedCreator) {
-      return res.status(404).json({ message: "Creator Not Found" });
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User Not Found" });
     }
     res
       .status(200)
-      .json({ message: "Creator has been updated", updatedCreator });
+      .json({ message: "User has been updated", updatedUser });
   } catch (err) {
     error(res, err);
   }
 });
 
 // !! Get One by ID -- GET
-router.get("/:creatorID/", async (req, res) => {
+router.get("/:userID/", async (req, res) => {
   try {
-    const creatorID = req.params.creatorID;
-    const getCreator = await Creator.find({ _id: creatorID });
+    const userID = req.params.userID;
+    const getUser = await User.find({ _id: userID });
 
-    getCreator ? success(res, getCreator) : incomplete(res);
+    getUser ? success(res, getUser) : incomplete(res);
   } catch (err) {
     error(res, err);
   }
@@ -107,27 +107,27 @@ router.get("/:creatorID/", async (req, res) => {
 // !! Get All -- GET
 router.get("/", async (req, res) => {
   try {
-    const getAllCreators = await Creator.find();
+    const getAllUsers = await User.find();
 
-    getAllCreators ? success(res, getAllCreators) : incomplete(res);
+    getAllUsers ? success(res, getAllUsers) : incomplete(res);
   } catch (err) {
     error(res, err);
   }
 });
 
 // !! Delete -- DELETE
-router.delete("/delete/:creatorID", validateSession, async (req, res) => {
+router.delete("/delete/:userID", validateSession, async (req, res) => {
   try {
-    const creatorID = req.params.creatorID;
+    const userID = req.params.userID;
 
-    const deleteCreator = await Creator.deleteOne({
-      _id: creatorID,
+    const deleteUser = await User.deleteOne({
+      _id: userID,
     });
 
-    if (!deleteCreator) {
-      return res.status(404).json({ message: "Creator Not Found" });
+    if (!deleteUser) {
+      return res.status(404).json({ message: "User Not Found" });
     }
-    res.status(200).json({ message: "Creator has been deleted" });
+    res.status(200).json({ message: "User has been deleted" });
   } catch (err) {
     error(res, err);
   }
